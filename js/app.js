@@ -334,7 +334,8 @@
     const details = R.fields(PF).filter(f => d[f.key] !== undefined && d[f.key] !== '' && f.type !== 'textarea' && !(Array.isArray(d[f.key]) && !d[f.key].length));
     view().innerHTML = `
       ${R.head(`מטופל <span class="code">${esc(p.code)}</span> ${p.active ? '' : R.pill('פרש/ה', '')}`, `${esc(p.ward || '')} · ${R.sexLabel(p.sex)} · גיל ${R.ageNow(p.birth_month) ?? '—'}`,
-        R.can('can_add_patients') ? `<button class="btn" id="editp">${icon('edit')} עריכת פרטים</button>` : '', `<a href="#/patients">מטופלים</a>`)}
+        (R.isAdmin() ? `<button class="btn danger" id="delp">${icon('trash')} מחיקת מטופל</button>` : '') +
+        (R.can('can_add_patients') ? `<button class="btn" id="editp">${icon('edit')} עריכת פרטים</button>` : ''), `<a href="#/patients">מטופלים</a>`)}
       <div class="patient-layout">
         <div>
           <div class="card">
@@ -352,6 +353,14 @@
         <aside class="card notes-side" id="psnotes"></aside>
       </div>`;
     if ($('#editp')) $('#editp').onclick = () => R.editPatient(p);
+    if ($('#delp')) $('#delp').onclick = () => R.modal('מחיקת מטופל ' + p.code, `
+        <div class="alert bad">${icon('alert')}<div><b>מחיקה סופית — לא ניתן לשחזר.</b><br>יימחקו המטופל, ${recs.length} הזנות ו-${notes.length} הערות. הפעולה תירשם ביומן.</div></div>
+        <p>למטופל שפרש מהמחקר <b>אין למחוק</b> — יש לסמן "פרש/ה" בעריכת פרטים, כדי שהנתונים יישמרו. מחיקה מיועדת רק למטופל שהוזן בטעות או לבדיקה.</p>
+        <div class="field"><label>להקלדת המספר הסידורי לאישור: <span class="code">${esc(p.code)}</span></label><input type="text" id="cc" dir="ltr" autocomplete="off"></div>`,
+      [{ id: 'del', label: 'מחיקה סופית', cls: 'danger', onClick: async (root) => {
+        await API.deletePatient(S.token, p.id, $('#cc', root).value);
+        R.invalidate(); R.toast(`המטופל ${p.code} נמחק`, 'good'); location.hash = '#/patients';
+      } }, { id: 'c', label: 'ביטול' }]);
     const drawTab = (k) => {
       R.ss.set('rs_tab', k);
       $$('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.t === k));

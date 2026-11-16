@@ -525,7 +525,7 @@
   const ACTIONS = { login: 'כניסה', login_failed: 'כניסה נכשלה', change_password: 'החלפת סיסמה', create_patient: 'גיוס מטופל', update_patient: 'עדכון מטופל',
     create_record: 'הזנה חדשה', update_record: 'עדכון הזנה', delete_record: 'מחיקת הזנה', verify_record: 'אישור הזנה', unverify_record: 'ביטול אישור',
     create_staff: 'הקמת משתמש', update_staff: 'עדכון משתמש', reset_password: 'איפוס סיסמה', save_settings: 'עדכון הגדרות', export: 'ייצוא נתונים',
-    create_form: 'יצירת טופס', update_form: 'עדכון טופס', add_note: 'הערה', resolve_note: 'סימון הערה כטופלה', reopen_note: 'פתיחת הערה' };
+    delete_patient: 'מחיקת מטופל', create_form: 'יצירת טופס', update_form: 'עדכון טופס', add_note: 'הערה', resolve_note: 'סימון הערה כטופלה', reopen_note: 'פתיחת הערה' };
   R.pages.audit = async () => {
     if (!guard(R.isAdmin())) return;
     R.loading();
@@ -533,7 +533,7 @@
     view().innerHTML = `${R.head('יומן פעולות', '500 הפעולות האחרונות')}
       <div class="card"><div class="table-wrap"><table><thead><tr><th>זמן</th><th>משתמש</th><th>פעולה</th><th>פרטים</th></tr></thead><tbody>
       ${list.map(a => `<tr><td class="small nowrap">${R.fmtDateTime(a.at)}</td><td>${esc(a.full_name || '—')}</td>
-        <td>${['login_failed', 'delete_record', 'unverify_record'].includes(a.action) ? R.pill(ACTIONS[a.action] || a.action, 'warn') : esc(ACTIONS[a.action] || a.action)}</td>
+        <td>${['login_failed', 'delete_record', 'unverify_record', 'delete_patient'].includes(a.action) ? R.pill(ACTIONS[a.action] || a.action, 'warn') : esc(ACTIONS[a.action] || a.action)}</td>
         <td class="small muted">${esc(a.entity && R.forms[a.entity] ? R.forms[a.entity].short : '')} ${esc(a.details ? (a.details.code || a.details.username || a.details.title || '') : '')}</td></tr>`).join('') || `<tr><td colspan="4">${R.empty('ריק')}</td></tr>`}
       </tbody></table></div></div>`;
   };

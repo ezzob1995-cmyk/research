@@ -30,10 +30,12 @@
     BAD_FORM_KEY: 'מזהה טופס לא תקין — אותיות אנגליות קטנות, ספרות וקו תחתון בלבד',
     BAD_FORM_DEF: 'הגדרת הטופס לא תקינה',
     NOTE_EMPTY: 'ההערה ריקה',
+    CONFIRM_MISMATCH: 'המספר הסידורי שהוקלד לא תואם — המחיקה בוטלה',
     NETWORK: 'אין חיבור לשרת. בדוק/י חיבור לאינטרנט'
   };
   function message(err) {
     const c = err && (err.code || err.message);
+    if (c && /rs_delete_patient/i.test(c)) return 'יש להריץ את sql/upgrade_v3.sql ב-Supabase כדי לאפשר מחיקת מטופל';
     if (c && /Could not find the function/i.test(c)) return 'השרת לא עודכן — יש להריץ את sql/upgrade_v2.sql ב-Supabase';
     return ERRORS[c] || ('שגיאה: ' + c);
   }
@@ -63,6 +65,7 @@
     saveForm: (t, key, def, active, sort) => rpc('rs_save_form', { p_token: t, p_key: key, p_def: def, p_active: active, p_sort: sort }),
     listPatients: (t) => rpc('rs_list_patients', { p_token: t }),
     savePatient: (t, p) => rpc('rs_save_patient', { p_token: t, p_patient: p }),
+    deletePatient: (t, id, code) => rpc('rs_delete_patient', { p_token: t, p_id: id, p_confirm_code: code }),
     listRecords: (t, pid, form) => rpc('rs_list_records', { p_token: t, p_patient_id: pid || null, p_form_type: form || null }),
     saveRecord: (t, r) => rpc('rs_save_record', { p_token: t, p_record: r }),
     deleteRecord: (t, id) => rpc('rs_delete_record', { p_token: t, p_id: id }),
